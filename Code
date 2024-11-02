@@ -1,0 +1,87 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Step 1: Load the Dataset
+def load_data(file_path):
+
+    G = nx.read_edgelist(file_path, comments='#', delimiter=' ', nodetype=int)
+    return G
+
+# Step 2: Implement BFS to Find the Shortest Path
+def bfs(graph, start_user, end_user):
+    visited = set()
+    queue = [(start_user, [start_user])]
+
+    while queue:
+        current_user, path = queue.pop(0)
+        if current_user == end_user:
+            return path
+
+        if current_user not in visited:
+            visited.add(current_user)
+            for neighbor in graph.neighbors(current_user):
+                queue.append((neighbor, path + [neighbor]))
+
+    return None
+
+# Step 3: Implement DFS to Explore Connections
+def dfs(graph, start_user):
+    visited = set()
+    stack = [start_user]
+    connections = []
+
+    while stack:
+        current_user = stack.pop()
+        if current_user not in visited:
+            visited.add(current_user)
+            connections.append(current_user)
+            for neighbor in graph.neighbors(current_user):
+                stack.append(neighbor)
+
+    return connections
+
+# Step 4: Visualize the Graph
+def draw_graph(graph):
+    plt.figure(figsize=(12, 12))
+    pos = nx.spring_layout(graph)
+    nx.draw(graph, pos, with_labels=True, node_size=50, font_size=10, alpha=0.5)
+    plt.title("Facebook Social Network Graph")
+    plt.show()
+
+# Step 5: Visualize the Path
+def draw_path(graph, path, title):
+    plt.figure(figsize=(12, 12))
+    pos = nx.spring_layout(graph)
+    nx.draw(graph, pos, with_labels=True, node_size=50, font_size=10, alpha=0.5)
+
+    # Highlight the path
+    path_edges = list(zip(path, path[1:]))
+    nx.draw_networkx_edges(graph, pos, edgelist=path_edges, edge_color='r', width=2)
+
+    plt.title(title)
+    plt.show()
+
+# Main Execution
+if __name__ == "__main__":
+
+    file_path = 'facebook_combined.txt'
+    G = load_data(file_path)
+
+    # Draw the entire graph
+    draw_graph(G)
+
+
+    start_user = 0
+
+    # Perform BFS
+    bfs_path = bfs(G, start_user, 1)
+    if bfs_path:
+        print("BFS Path from {} to {}: {}".format(start_user, 1, bfs_path))
+        draw_path(G, bfs_path, "BFS Path from {} to {}".format(start_user, 1))
+    else:
+        print("No path found using BFS from {} to {}".format(start_user, 1))
+
+    # Perform DFS
+    dfs_path = dfs(G, start_user)
+    print("DFS Connections from {}: {}".format(start_user, dfs_path))
+    draw_path(G, dfs_path, "DFS Connections from {}".format(start_user))
